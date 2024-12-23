@@ -3,13 +3,12 @@ import morgan from "morgan";
 import { globalRouter, userRouter, videoRouter } from "./routers";
 
 const PORT = 4000;
-
 const app = express();
-
-/// LOG ///
 const logger = morgan("dev");
-app.use(logger);
 
+app.set("view engine", "pug");
+app.set("views", process.cwd() + "/src/views");
+app.use(logger);
 app.use("/", globalRouter);
 app.use("/user", userRouter);
 app.use("/video", videoRouter);
