@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import User from "../models/User";
+import Video from "../models/Video";
 import fetch from "node-fetch";
 
 export const getJoin = (req, res) => res.render("join", { pageTitle: "Join" });
@@ -60,7 +61,6 @@ export const postLogin = async (req, res) => {
   req.session.user = user;
   return res.redirect("/");
 };
-export const see = (req, res) => res.send("See User");
 
 export const startGithubLogib = (req, res) => {
   const baseUrl = "https://github.com/login/oauth/authorize";
@@ -148,13 +148,16 @@ export const getEdit = (req, res) => {
 export const postEdit = async (req, res) => {
   const {
     session: {
-      user: { _id },
+      user: { _id, avatarUrl },
     },
     body: { name, email, username, location },
+    file,
   } = req;
+  console.log(file);
   const updateUser = await User.findByIdAndUpdate(
     _id,
     {
+      avatarUrl: file ? file.path : avatarUrl,
       name,
       email,
       username,
@@ -164,6 +167,53 @@ export const postEdit = async (req, res) => {
   );
   req.session.user = updateUser;
   return res.redirect("/users/edit");
+};
+
+export const getChangePassword = (req, res) => {
+  if (req.session.user.socialOnly === true) {
+    return redirect("/");
+  }
+  return res.render("users/change-password", {
+    pageTitle: "Change Password ",
+  });
+};
+export const postChangePassword = async (req, res) => {
+  const {
+    session: {
+      user: { _id },
+    },
+    body: { oldPassword, newPassword, newPassword2 },
+  } = req;
+  const user = await User.findById(_id);
+  const ok = await bcrypt.compare(oldPassword, user.password);
+  if (!ok) {
+    return res.status(400).render("users/change-password", {
+      pageTitle: "Change Password",
+      errorMessage: "The current password is incorrect.",
+    });
+  }
+  if (newPassword !== newPassword2) {
+    return res.status(400).render("users/change-password", {
+      pageTitle: "Change Password",
+      errorMessage: "The password does not match the confirmation.",
+    });
+  }
+  user.password = newPassword;
+  await user.save();
+  req.session.user.password = user.password;
+  return res.redirect("users/logout");
+};
+
+export const see = async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findById(id).populate("videos");
+  if (!user) {
+    return res.status(404).render("404", { pageTitle: "User not found." });
+  }
+  return res.render("users/profile", {
+    pageTitle: `${user.name}'s Profile`,
+    user,
+  });
 };
 
 export const remove = (req, res) => res.send("Delete Usaer");
