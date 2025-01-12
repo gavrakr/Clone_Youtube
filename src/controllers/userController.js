@@ -3,7 +3,10 @@ import User from "../models/User";
 import Video from "../models/Video";
 import fetch from "node-fetch";
 
-export const getJoin = (req, res) => res.render("join", { pageTitle: "Join" });
+export const getJoin = (req, res) => {
+  return res.render("join", { pageTitle: "Join" });
+};
+
 export const postJoin = async (req, res) => {
   const { name, email, username, password, password2, location } = req.body;
   const pageTitle = "Join";
@@ -37,9 +40,11 @@ export const postJoin = async (req, res) => {
     });
   }
 };
+
 export const getLogin = (req, res) => {
   return res.render("login", { pageTitle: "Log in" });
 };
+
 export const postLogin = async (req, res) => {
   const pageTitle = "Lon in";
   const { username, password } = req.body;
@@ -177,6 +182,7 @@ export const getChangePassword = (req, res) => {
     pageTitle: "Change Password ",
   });
 };
+
 export const postChangePassword = async (req, res) => {
   const {
     session: {
