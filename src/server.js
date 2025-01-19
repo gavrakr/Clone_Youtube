@@ -2,6 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import session from "express-session";
 import MongoStore from "connect-mongo";
+import apiRouter from "./routers/apiRouter";
 import { rootRouter, userRouter, videoRouter } from "./routers";
 import { localMiddleware } from "./middlewares";
 
@@ -28,5 +29,6 @@ app.use("/static", express.static("assets"));
 app.use("/", rootRouter);
 app.use("/users", userRouter);
 app.use("/videos", videoRouter);
+app.use("/api", apiRouter);
 
 export default app;
