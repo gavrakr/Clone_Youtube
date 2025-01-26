@@ -1,7 +1,5 @@
 import bcrypt from "bcrypt";
 import User from "../models/User";
-import Video from "../models/Video";
-import fetch from "node-fetch";
 
 export const getJoin = (req, res) => {
   return res.render("join", { pageTitle: "Join" });
@@ -176,6 +174,7 @@ export const postEdit = async (req, res) => {
 
 export const getChangePassword = (req, res) => {
   if (req.session.user.socialOnly === true) {
+    req.flash("error", "Can't change password.");
     return redirect("/");
   }
   return res.render("users/change-password", {
@@ -205,6 +204,7 @@ export const postChangePassword = async (req, res) => {
     });
   }
   user.password = newPassword;
+  req.flash("info", "Password updated");
   await user.save();
   req.session.user.password = user.password;
   return res.redirect("users/logout");
